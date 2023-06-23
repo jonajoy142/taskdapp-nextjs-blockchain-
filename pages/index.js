@@ -13,6 +13,7 @@ function App() {
     const connectToMetamask = async () => {
       try {
         if (window.ethereum) {
+        
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
           console.log(await signer.getAddress());
@@ -41,7 +42,8 @@ function App() {
       headers: {
         'Content-Type' : 'application/json'
       },
-      body: JSON.stringify(task)
+      
+      body: JSON.stringify(task),
     });
 
     if (!response.ok) {
@@ -51,8 +53,16 @@ function App() {
 
     const resp = await response.json();
     const status = resp.message;
-    console.log(status);
-
+    
+    console.log(status + " " + task);
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    console.log(await signer.getAddress());
+    const contractInstance = new ethers.Contract(Constants.contractAddress, Constants.contractAbi, signer);
+    var tasks = await contractInstance.getAllTasks();
+    setTasks(tasks);
+    console.log(tasks);
+    
   }
 
   const handleChange = async (event) => {
@@ -102,6 +112,7 @@ function App() {
             {tasks.map((task, index) => (
               <tr key={index}>
                 <td>{index}</td>
+                <td>{task.name}</td>
                 <td>{task.desc}</td>
                 <td>{task.status === 0 ? 'Pending' : 'Finished'}</td>
                 <td >
